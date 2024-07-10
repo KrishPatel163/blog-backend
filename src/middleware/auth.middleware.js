@@ -21,7 +21,9 @@ const verifyJWT = async (req, res, next) => {
             throw new ApiError(401, "Unauthorized Access!!");
         }
 
-        const user = await User.findById(decodedToken.id);
+        const user = await User.findById(decodedToken.id).select(
+            "-password -ownedBlogs"
+        );
 
         if (!user) {
             throw new ApiError(401, "Token is invalid or used");
@@ -34,6 +36,4 @@ const verifyJWT = async (req, res, next) => {
     }
 };
 
-export {
-    verifyJWT
-}
+export { verifyJWT };

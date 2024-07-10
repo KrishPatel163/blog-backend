@@ -13,8 +13,7 @@ app.use(cors());
 import userRouter from "./routes/user.router.js";
 import blogRouter from "./routes/blogs.router.js";
 
-
-app.use("/api/v1/users", userRouter)
+app.use("/api/v1/users", userRouter);
 app.use("/api/v1/blogs", blogRouter);
 
 export default app;

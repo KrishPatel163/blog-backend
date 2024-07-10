@@ -2,12 +2,14 @@ import { Blog } from "../models/blog.model.js";
 import { User } from "../models/user.model.js";
 import { ApiError } from "../utils/ApiError.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
+import { uploadToCloudinary } from "../utils/cloudinary.js";
 
 const createBlog = async (req, res, next) => {
     try {
         const { title, description } = req.body;
+        const localFilePath = req.file;
 
-        if (!title && !description) {
+        if (!title && !description && !localFilePath) {
             throw new ApiError(401, "All fields are required");
         }
 
@@ -17,9 +19,16 @@ const createBlog = async (req, res, next) => {
             throw new ApiError(400, "invalid user on token");
         }
 
+        const blog_img = await uploadToCloudinary(req.file.path);
+
+        if (!blog_img) {
+            throw new ApiError(500, "Image couldnt upload to cloudinary");
+        }
+
         const blog = await Blog.create({
             title,
             description,
+            image: blog_img.url,
         });
 
         if (!blog) {
@@ -39,6 +48,7 @@ const createBlog = async (req, res, next) => {
             )
         );
     } catch (error) {
+        console.log(error);
         next(error);
     }
 };
@@ -118,7 +128,9 @@ const deleteBlog = async (req, res, next) => {
                 "Blog Created Successfully"
             )
         );
-    } catch (error) {}
+    } catch (error) {
+        next(error);
+    }
 };
 
 export { createBlog, getAllBlogs, showSingleBlog, deleteBlog };

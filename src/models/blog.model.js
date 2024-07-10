@@ -10,6 +10,10 @@ const blogSchema = new Schema(
             type: String,
             required: true,
         },
+        image: {
+            type: String, // Cloudinary URL
+            required: true,
+        },
         owner: {
             type: Schema.Types.ObjectId,
             ref: "User",
