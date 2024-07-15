@@ -10,6 +10,14 @@ const blogSchema = new Schema(
             type: String,
             required: true,
         },
+        author: {
+            type: String,
+            required: true,
+        },
+        designation: {
+            type: String,
+            requried: true,
+        },
         image: {
             type: String, // Cloudinary URL
             required: true,
@@ -17,6 +25,7 @@ const blogSchema = new Schema(
         owner: {
             type: Schema.Types.ObjectId,
             ref: "User",
+            required: true,
         },
     },
     {

@@ -24,7 +24,7 @@ const userSchema = new Schema(
             type: String,
             required: true,
             enum: ["user", "content-creator", "admin"],
-            default: "user",
+            default: "content-creator",
         },
         ownedBlogs: [
             {

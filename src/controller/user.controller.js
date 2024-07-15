@@ -25,18 +25,26 @@ const handleRegister = async (req, res, next) => {
 
         const accessToken = user.generateAccessToken();
 
-        return res.status(200).send(
-            new ApiResponse(
-                200,
-                {
-                    user,
-                    accessToken,
-                },
-                "User Created Successfully"
-            )
-        );
+        const cookieOption = {
+            httpOnly: true,
+            secure: true,
+        };
+
+        return res
+            .status(200)
+            .cookie("accessToken", accessToken, cookieOption)
+            .send(
+                new ApiResponse(
+                    200,
+                    {
+                        user,
+                        accessToken,
+                    },
+                    "User Created Successfully"
+                )
+            );
     } catch (error) {
-        res.send(error);
+        next(error);
     }
 };
 
@@ -83,8 +91,7 @@ const handleLogin = async (req, res, next) => {
                 )
             );
     } catch (error) {
-        console.log(error);
-        res.send(error);
+        next(error);
     }
 };
 
@@ -104,8 +111,7 @@ const handleLogout = async (req, res, next) => {
             .clearCookie("accessToken", cookieOption)
             .send(new ApiResponse(200, {}, "Logged Out successfully", true));
     } catch (error) {
-        console.log(error);
-        res.send(error);
+        next(error);
     }
 };
 

@@ -1,3 +1,4 @@
+import sanitizeHtml from "sanitize-html";
 import { Blog } from "../models/blog.model.js";
 import { User } from "../models/user.model.js";
 import { ApiError } from "../utils/ApiError.js";
@@ -6,12 +7,25 @@ import { uploadToCloudinary } from "../utils/cloudinary.js";
 
 const createBlog = async (req, res, next) => {
     try {
-        const { title, description } = req.body;
+        let { title, description } = req.body;
+        const { author, designation } = req.body;
+        console.log(author, designation);
         const localFilePath = req.file;
 
-        if (!title && !description && !localFilePath) {
+        if (
+            !title &&
+            !description &&
+            !localFilePath &&
+            !author &&
+            !designation
+        ) {
             throw new ApiError(401, "All fields are required");
         }
+
+        title = sanitizeHtml(title);
+        description = sanitizeHtml(description);
+
+        console.log(title, description);
 
         const user = await User.findById(req.user.id);
 
@@ -28,7 +42,10 @@ const createBlog = async (req, res, next) => {
         const blog = await Blog.create({
             title,
             description,
+            author,
+            designation,
             image: blog_img.url,
+            owner: req.user.id,
         });
 
         if (!blog) {
@@ -48,7 +65,6 @@ const createBlog = async (req, res, next) => {
             )
         );
     } catch (error) {
-        console.log(error);
         next(error);
     }
 };
@@ -80,20 +96,18 @@ const getAllBlogs = async (req, res, next) => {
 
 const showSingleBlog = async (req, res, next) => {
     try {
-        const blog = await Blog.findById(req.params.id);
+        const blog = await Blog.findById(req.params.id).populate(
+            "owner",
+            "username"
+        );
 
         if (!blog) {
-            throw new ApiError(
-                500,
-                "Something went wrong while fetching all blogs"
-            );
+            throw new ApiError(401, "Blog id is not on the records");
         }
 
         return res
             .status(200)
-            .send(
-                new ApiResponse(200, { blog }, "All blogs Fetched Successfully")
-            );
+            .send(new ApiResponse(200, { blog }, "blog Fetched Successfully"));
     } catch (error) {
         next(error);
     }
@@ -125,7 +139,7 @@ const deleteBlog = async (req, res, next) => {
                 {
                     deletedBlog,
                 },
-                "Blog Created Successfully"
+                "Blog Deleted Successfully"
             )
         );
     } catch (error) {
